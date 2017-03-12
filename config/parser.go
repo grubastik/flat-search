@@ -3,11 +3,10 @@ package config
 import (
     "io/ioutil"
     "encoding/json"
-
-    "./../error"
+    "fmt"
 )
 
-const path = "./config.json"
+//const path = "./config.json"
 
 type Config struct {
     Db *Db
@@ -35,6 +34,8 @@ type Email struct{
 }
 
 type Sreality struct{
+    Url string
+    UrlDetail string `json:"url_detail"`
     RealityType int `json:"reality_type"`
     OperationType int `json:"operation_type"`
     RealityOptions []int `json:"reality_options"`
@@ -52,11 +53,13 @@ type rangeInt struct {
     Max int
 }
 
-func New() (*Config) {
+func NewConfig(path *string) (*Config) {
     config := new(Config);
-    content, err := ioutil.ReadFile(path);
+    content, err := ioutil.ReadFile(*path);
     err = json.Unmarshal(content, config)
-    error.DebugError(err)
+    if err != nil {
+        panic(fmt.Sprintf("%v", err))
+    }
 
     return config
 }

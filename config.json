@@ -17,6 +17,8 @@
         "password": ""
     },
     "sreality": {
+        "url": "https://www.sreality.cz/api/cs/v2/estates",
+        "url_detail": "https://www.sreality.cz/detail/",
         "reality_type": 1,
         "operation_type": 2,
         "reality_options": [2,3,4],

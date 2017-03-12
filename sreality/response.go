@@ -2,11 +2,9 @@
 package sreality
 
 import(
-    "./../models"
     "strconv"
+    "github.com/grubastik/flat-search/models"
 )
-
-const domain = "https://www.sreality.cz/detail/";
 
 type urlPartsDefinition struct {
     Category_main_cb map[string]string
@@ -65,14 +63,14 @@ func (b *Body) GetAdvert(index int) *advert {
 func (a *advert) ConvertToModel() (*models.Advert){
     var aModel = new(models.Advert)
     var lModel = new(models.Location)
-    aModel.SetLocality(a.Locality)
-    aModel.SetHash(a.Hash_id)
-    aModel.SetPrice(a.Price)
-    aModel.SetName(a.Name)
-    lModel.SetLatitude(a.Gps.Lat)
-    lModel.SetLongitude(a.Gps.Lon)
-    aModel.SetLink(a.getLink())
-    aModel.SetLocation(lModel)
+    aModel.Locality = a.Locality
+    aModel.HashId = a.Hash_id
+    aModel.Price = a.Price
+    aModel.Name = a.Name
+    lModel.Lat = a.Gps.Lat
+    lModel.Lon = a.Gps.Lon
+    aModel.Link = a.getLink()
+    aModel.Location = lModel
     return aModel
 }
 
@@ -81,7 +79,7 @@ func (a *advert) getLink() (string) {
         map[string]string{"1":"byt", "2":"dom", "666": "projekt", "3": "pozemka", "4": "komercni", "5": "ostatni"},
         map[string]string{"2":"1%2Bkk", "3": "1%2B1", "4": "2%2Bkk", "5": "2%2B1", "6": "3%2Bkk", "7": "3%2B1", "8": "4%2Bkk", "9": "4%2B1", "10":"5%2Bkk", "11":"5%2B1", "12": "6-a-vice", "16": "atypicky"},
         map[string]string{"1":"prodej", "2":"pronajem", "3": "drazby"} }
-    url := domain
+    url := conf.GetSreality().UrlDetail
     url+= urlParts.Category_type_cb[strconv.FormatInt(a.Seo.Category_type_cb, 10)] + "/"
     url+= urlParts.Category_type_cb[strconv.FormatInt(a.Seo.Category_main_cb, 10)] + "/"
     url+= urlParts.Category_type_cb[strconv.FormatInt(a.Seo.Category_type_cb, 10)] + "/"

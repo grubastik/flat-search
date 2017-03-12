@@ -3,30 +3,9 @@ package email
 
 import(
     "strconv"
-    "net/mail"
 
-    "../models"
+    "github.com/grubastik/flat-search/models"
 )
-
-func (ed *EmailDefinition) setFrom(email, name string) {
-    ed.from = &mail.Address{name, email}
-}
-
-func (ed *EmailDefinition) setTo(email, name string) {
-    ed.to = &mail.Address{name, email}
-}
-
-func (ed *EmailDefinition) setCC(email, name string) {
-    //not implemented
-}
-
-func (ed *EmailDefinition) setSubject(subject string) {
-    ed.subject = subject;
-}
-
-func (ed *EmailDefinition) setBody(body string) {
-    ed.body = body;
-}
 
 func (ed *EmailDefinition) clearHeaders() {
     ed.headers = make(map[string]string)
@@ -42,15 +21,15 @@ func (ed *EmailDefinition) PrepareData(model *models.Advert) {
 }
 
 func getSubject(model *models.Advert) string {
-    return "FlatSearch Agent: Found new advert " + strconv.Itoa(int(model.GetHash()));
+    return "FlatSearch Agent: Found new advert " + strconv.Itoa(int(model.HashId));
 }
 
 func getBody(model *models.Advert) string {
-    return "Hash: " + strconv.Itoa(int(model.GetHash())) + 
-        "\nName: " + model.GetName() + 
-        "\nLocality: " + model.GetLocality() + 
-        "\nPrice: " + strconv.FormatFloat(model.GetPrice(), 'f', 2, 64) + 
-        "\nUrl: " + model.GetLink() + 
+    return "Hash: " + strconv.Itoa(int(model.HashId)) + 
+        "\nName: " + model.Name + 
+        "\nLocality: " + model.Locality + 
+        "\nPrice: " + strconv.FormatFloat(model.Price, 'f', 2, 64) + 
+        "\nUrl: " + model.Link + 
         "\n";
 }
 

@@ -2,33 +2,27 @@
 package main
 
 import (
-    "./sreality"
-    _ "./models"
-    "./db"
-    "./config"
-    "./email"
+    "flag"
+    "github.com/grubastik/flat-search/sreality"
+    _ "github.com/grubastik/flat-search/models"
+    "github.com/grubastik/flat-search/db"
+    "github.com/grubastik/flat-search/config"
+    "github.com/grubastik/flat-search/error"
 )
 
 
 
 func main() {
-    config := config.New()
+    path := flag.String("config", "./config.json", "Path to the config file")
+    
+    config := config.NewConfig(path)
 
-    var urlParameters *sreality.UrlParams = sreality.New(config)
-    adverts := urlParameters.MakeRequest()
-
-    db.Storage = db.NewStorage(config)
+    storage, err := db.NewDb(config)
+    error.DebugError(err)
+    db.Storage = storage
     defer db.Storage.Close()
 
-    for _, advert := range *(adverts.GetAdverts()) {
-        aModel := advert.ConvertToModel()
-        if (!aModel.ExistsInDbByHashId()) {
-            //record to db
-            aModel.Insert()
-            //sendemail
-            email := email.New(config)
-            email.PrepareData(aModel)
-            email.Send()
-        }
-    }
+    var urlParameters *sreality.UrlParams = sreality.NewSreality(config)
+    err = urlParameters.ProcessAdverts()
+    error.DebugError(err)
 }
