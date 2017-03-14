@@ -2,7 +2,7 @@ package models
 
 import(
     "database/sql"
-    "./../db"
+    "github.com/grubastik/flat-search/db"
 )
 
 type Location struct {
@@ -12,70 +12,55 @@ type Location struct {
     Lon float64
 }
 
-func (l *Location) SetId(id int64) {
-    l.Id = id
-}
-
-func (l *Location) SetAdvertId(advertId int64) {
-    l.AdvertId = advertId
-}
-
-func (l *Location) SetLatitude(lat float64) {
-    l.Lat = lat
-}
-
-func (l *Location) SetLongitude(lon float64) {
-    l.Lon = lon
-}
-
-func (l *Location) GetId() int64 {
-    return l.Id
-}
-
-func (l *Location) GetAdvertId() int64 {
-    return l.AdvertId
-}
-
-func (l *Location) GetLatitude() float64 {
-    return l.Lat
-}
-
-func (l *Location) GetLongitude() float64 {
-    return l.Lon
-}
-
-func (l *Location) Insert() {
+func (l *Location) Insert() (error) {
     var result sql.Result
     var id int64
-    result = db.Storage.Run("INSERT INTO locations (advert_id, lat, lon) VALUES( ?, ?, ? )",
-        l.GetAdvertId(), l.GetLatitude(), l.GetLongitude())
-    id, _ = result.LastInsertId()
-    l.SetId(id)
+    result, err := db.Storage.Run("INSERT INTO locations (advert_id, lat, lon) VALUES( ?, ?, ? )", l.AdvertId, l.Lat, l.Lon)
+    if err != nil {
+        return err
+    }
+    id, err = result.LastInsertId()
+    if err != nil {
+        return err
+    }
+    l.Id = id
+    return nil
 }
 
-func (l *Location) Update() {
-    db.Storage.Run("UPDATE locations SET advert_id = ?, lat = ?, lon = ? WHERE id = ?",
-        l.GetAdvertId(), l.GetLatitude(), l.GetLongitude(), l.GetId())
+func (l *Location) Update() (error) {
+    _, err := db.Storage.Run("UPDATE locations SET advert_id = ?, lat = ?, lon = ? WHERE id = ?",
+        l.AdvertId, l.Lat, l.Lon, l.Id)
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func (l *Location) Delete() {
-    db.Storage.Run("DELETE FROM locations WHERE id = ?", l.GetId())
+func (l *Location) Delete() (error) {
+    _, err := db.Storage.Run("DELETE FROM locations WHERE id = ?", l.Id)
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func (l *Location) Load() {
+func (l *Location) Load() (error) {
+    return l.loadBy("id", l.Id)
+}
+
+func (l *Location) LoadByAdvertId() (error) {
+    return l.loadBy("advert_id", l.AdvertId)
+}
+
+func (l *Location) loadBy(field string, value interface{}) (error) {
     var row *sql.Row
     var stmt *sql.Stmt
-    stmt = db.Storage.Prepare("SELECT * FROM locations WHERE id = ?")
+    stmt, err := db.Storage.Prepare("SELECT * FROM locations WHERE " + field + " = ?")
+    if err != nil {
+        return err
+    }
     defer stmt.Close()
-    row = db.Storage.GetRow(stmt, l.GetId())
+    row = db.Storage.GetRow(stmt, value)
     row.Scan(l);
-}
-
-func (l *Location) LoadByAdvertId() {
-    var row *sql.Row
-    var stmt *sql.Stmt
-    stmt = db.Storage.Prepare("SELECT * FROM locations WHERE advert_id = ?")
-    defer stmt.Close()
-    row = db.Storage.GetRow(stmt, l.GetAdvertId())
-    row.Scan(l);
+    return nil
 }

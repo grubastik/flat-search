@@ -7,8 +7,7 @@ import (
 	"net/smtp"
     "crypto/tls"
     "strconv"
-    "./../error"
-    "./../config"
+    "github.com/grubastik/flat-search/config"
 )
 
 const configName = "email"
@@ -27,29 +26,29 @@ type EmailDefinition struct {
     password string
 }
 
-func New(config *config.Config) (*EmailDefinition) {
+func NewEmail(config *config.Config) (*EmailDefinition) {
     var emailDefinition *EmailDefinition = new(EmailDefinition);
     moduleConfig := config.GetEmail();
 
-    if (len(moduleConfig.To) > 0) {
-        emailDefinition.setTo(moduleConfig.To, "");
+    if len(moduleConfig.To) > 0 {
+        emailDefinition.to = &mail.Address{"", moduleConfig.To}
     }
-    if (len(moduleConfig.From) > 0) {
-        emailDefinition.setFrom(moduleConfig.From, "");
+    if len(moduleConfig.From) > 0 {
+        emailDefinition.from = &mail.Address{"", moduleConfig.From}
     }
-    if (len(moduleConfig.Server) > 0) {
+    if len(moduleConfig.Server) > 0 {
         emailDefinition.server = moduleConfig.Server;
     }
-    if (moduleConfig.TlsPort > 0) {
+    if moduleConfig.TlsPort > 0 {
         emailDefinition.port = moduleConfig.TlsPort;
     }
-    if (moduleConfig.Tls) {
+    if moduleConfig.Tls {
         emailDefinition.tlsEnabled = moduleConfig.Tls;
     }
-    if (len(moduleConfig.Username) > 0) {
+    if len(moduleConfig.Username) > 0 {
         emailDefinition.username = moduleConfig.Username;
     }
-    if (len(moduleConfig.Password) > 0) {
+    if len(moduleConfig.Password) > 0 {
         emailDefinition.password = moduleConfig.Password;
     }
     return emailDefinition;
@@ -67,7 +66,7 @@ func (ed *EmailDefinition) getMessage() (string) {
     return message
 }
 
-func (ed *EmailDefinition) Send() {
+func (ed *EmailDefinition) Send() (error) {
     // Setup message
     message := ed.getMessage();
 
@@ -77,35 +76,55 @@ func (ed *EmailDefinition) Send() {
 
     // To && From
     err := ed.connection.Mail(ed.from.Address);
-    error.DebugError(err)
+    if err != nil {
+        return err
+    }
     err = ed.connection.Rcpt(ed.to.Address);
-    error.DebugError(err)
+    if err != nil {
+        return err
+    }
 
     // Data
     w, err := ed.connection.Data()
-    error.DebugError(err)
+    if err != nil {
+        return err
+    }
 
     _, err = w.Write([]byte(message))
-    error.DebugError(err)
+    if err != nil {
+        return err
+    }
 
     err = w.Close()
-    error.DebugError(err)
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func (ed *EmailDefinition) authenticate() {
-    host := GetHost(ed.server + ":" + strconv.Itoa(ed.port))
+func (ed *EmailDefinition) authenticate() (error) {
+    host, err := GetHost(ed.server + ":" + strconv.Itoa(ed.port))
+    if err != nil {
+        return err
+    }
     auth := smtp.PlainAuth("", ed.username, ed.password, host)
-    err := ed.connection.Auth(auth);
-    error.DebugError(err)
+    err = ed.connection.Auth(auth);
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func GetHost(servername string) string {
-    host, _, _ := net.SplitHostPort(servername)
-    return host
+func GetHost(servername string) (string, error) {
+    host, _, err := net.SplitHostPort(servername)
+    return host, err
 }
 
-func (ed *EmailDefinition) makeSmtpClient() {
-    host := GetHost(ed.server + ":" + strconv.Itoa(ed.port))
+func (ed *EmailDefinition) makeSmtpClient() (error) {
+    host, err := GetHost(ed.server + ":" + strconv.Itoa(ed.port))
+    if err != nil {
+        return err
+    }
 
     // TLS config
     tlsconfig := &tls.Config {
@@ -116,10 +135,15 @@ func (ed *EmailDefinition) makeSmtpClient() {
     // for smtp servers running on 465 that require an ssl connection
     // from the very beginning (no starttls)
     conn, err := tls.Dial("tcp", ed.server + ":" + strconv.Itoa(ed.port), tlsconfig)
-    error.DebugError(err)
+    if err != nil {
+        return err
+    }
 
     c, err := smtp.NewClient(conn, host)
-    error.DebugError(err)
+    if err != nil {
+        return err
+    }
     
     ed.connection = c
+    return nil
 }

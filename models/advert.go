@@ -4,8 +4,10 @@ import (
     "time"
     "errors"
     "database/sql"
-    "./../db"
+    "github.com/grubastik/flat-search/db"
 )
+
+const statusNew = "new";
 
 type Advert struct {
     Id int64
@@ -19,65 +21,9 @@ type Advert struct {
     Location *Location
 }
 
-func (a *Advert) SetId(id int64) {
-    a.Id = id
-}
-
-func (a *Advert) SetLocality(locality string) {
-    a.Locality = locality
-}
-
-func (a *Advert) SetLink(link string) {
-    a.Link = link
-}
-
-func (a *Advert) SetHash(hash int64) {
-    a.HashId = hash
-}
-
-func (a *Advert) SetPrice(price float64) {
-    a.Price = price
-}
-
-func (a *Advert) SetName(name string) {
-    a.Name = name
-}
-
-func (a *Advert) SetStatus(status string) {
-    a.Status = status
-}
-
-func (a *Advert) SetLocation(location *Location) {
-    a.Location = location
-}
-
-func (a *Advert) GetId() int64 {
-    return a.Id
-}
-
-func (a *Advert) GetLocality() string {
-    return a.Locality
-}
-
-func (a *Advert) GetLink() string {
-    return a.Link
-}
-
-func (a *Advert) GetHash() int64 {
-    return a.HashId
-}
-
-func (a *Advert) GetPrice() float64 {
-    return a.Price
-}
-
-func (a *Advert) GetName() string {
-    return a.Name
-}
-
 func (a *Advert) GetStatus() string {
     if (a.Status == "") {
-        a.Status = "new"
+        a.Status = statusNew
     }
     return a.Status
 }
@@ -89,73 +35,86 @@ func (a *Advert) GetCreated() time.Time {
     return time.Unix(a.Created, 0)
 }
 
-func (a *Advert) GetLocation() *Location {
-    return a.Location
-}
-
-func (a *Advert) ExistsInDbByHashId() bool {
+func (a *Advert) ExistsInDbByHashId() (bool, error) {
     var row *sql.Row
     var stmt *sql.Stmt
     var test = new(Advert)
-    stmt = db.Storage.Prepare("SELECT id FROM adverts WHERE hash_id = ?")
+    stmt, err := db.Storage.Prepare("SELECT id FROM adverts WHERE hash_id = ?")
+    if err != nil {
+        return false, err
+    }
     defer stmt.Close()
-    row = db.Storage.GetRow(stmt, a.GetHash())
+    row = db.Storage.GetRow(stmt, a.HashId)
     row.Scan(&test.Id)
-    return test.GetId() > 0
+    return test.Id > 0, nil
 }
 
-func (a *Advert) Insert() {
+func (a *Advert) Insert() (error) {
     var result sql.Result
     var id int64
-    result = db.Storage.Run("INSERT INTO adverts (locality, link, hash_id, price, name, status, created) VALUES( ?, ?, ?, ?, ?, ?, ? )",
-        a.GetLocality(), a.GetLink(), a.GetHash(), a.GetPrice(), a.GetName(), a.GetStatus(), a.GetCreated().Unix())
-    id, _ = result.LastInsertId()
-    a.SetId(id)
-    a.GetLocation().SetAdvertId(a.GetId())
-    a.GetLocation().Insert()
+    result, err := db.Storage.Run("INSERT INTO adverts (locality, link, hash_id, price, name, status, created) VALUES( ?, ?, ?, ?, ?, ?, ? )",
+        a.Locality, a.Link, a.HashId, a.Price, a.Name, a.GetStatus(), a.GetCreated().Unix())
+    if err != nil {
+        return err
+    }
+    id, err = result.LastInsertId()
+    if err != nil {
+        return err
+    }
+    a.Id = id
+    a.Location.AdvertId = a.Id
+    a.Location.Insert()
+    return nil
 }
 
-func (a *Advert) Update() {
-    db.Storage.Run("UPDATE adverts SET locality = ?, link = ?, hash_id = ?, price = ?, name = ?, status = ? WHERE id = ?",
-        a.GetLocality(), a.GetLink(), a.GetHash(), a.GetPrice(), a.GetName(), a.GetStatus(), a.GetCreated().Unix())
-    a.GetLocation().Update()
-}
-
-func (a *Advert) Delete() {
-    a.GetLocation().Delete()
-    db.Storage.Run("DELETE FROM adverts WHERE id = ?", a.GetId())
-}
-
-func (a *Advert) Load() error {
-    var row *sql.Row
-    var stmt *sql.Stmt
-    stmt = db.Storage.Prepare("SELECT id, locality, link, hash_id, price, name, status, created FROM adverts WHERE id = ?")
-    defer stmt.Close()
-    row = db.Storage.GetRow(stmt, a.GetId())
-    row.Scan(&a.Id, &a.Locality, &a.Link, &a.HashId, &a.Price, &a.Name, &a.Status, &a.Created);
-    if (a.GetId() > 0) {
-        var lModel = new(Location);
-        lModel.SetAdvertId(a.GetId())
-        lModel.LoadByAdvertId()
-        a.SetLocation(lModel)
-    } else {
-        return errors.New("Advert does not exist")
+func (a *Advert) Update() (error) {
+    _, err := db.Storage.Run("UPDATE adverts SET locality = ?, link = ?, hash_id = ?, price = ?, name = ?, status = ? WHERE id = ?",
+        a.Locality, a.Link, a.HashId, a.Price, a.Name, a.GetStatus(), a.GetCreated().Unix())
+    if err != nil {
+        return err
+    }
+    err = a.Location.Update()
+    if err != nil {
+        return err
     }
     return nil
 }
 
+func (a *Advert) Delete() (error) {
+    err := a.Location.Delete()
+    if err != nil {
+        return err
+    }
+    _, err = db.Storage.Run("DELETE FROM adverts WHERE id = ?", a.Id)
+    if err != nil {
+        return err
+    }
+    return nil
+}
+
+func (a *Advert) Load() error {
+    return a.loadBy("id", a.Id)
+}
+
 func (a *Advert) LoadByHashId() error {
+    return a.loadBy("hash_id", a.HashId)
+}
+
+func (a *Advert) loadBy(field string, value interface{}) error {
     var row *sql.Row
     var stmt *sql.Stmt
-    stmt = db.Storage.Prepare("SELECT id, locality, link, hash_id, price, name, status, created FROM adverts WHERE hash_id = ?")
+    stmt, err := db.Storage.Prepare("SELECT id, locality, link, hash_id, price, name, status, created FROM adverts WHERE " + field + " = ?")
+    if err != nil {
+        return err
+    }
     defer stmt.Close()
-    row = db.Storage.GetRow(stmt, a.GetHash())
+    row = db.Storage.GetRow(stmt, value)
     row.Scan(&a.Id, &a.Locality, &a.Link, &a.HashId, &a.Price, &a.Name, &a.Status, &a.Created);
-    if (a.GetId() > 0) {
+    if (a.Id > 0) {
         var lModel = new(Location);
-        lModel.SetAdvertId(a.GetId())
+        lModel.AdvertId = a.Id
         lModel.LoadByAdvertId()
-        a.SetLocation(lModel)
+        a.Location = lModel
     } else {
         return errors.New("Advert does not exist")
     }
