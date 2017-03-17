@@ -21,17 +21,26 @@ type Advert struct {
     Location *Location
 }
 
-func (a *Advert) GetStatus() string {
-    if (a.Status == "") {
-        a.Status = statusNew
-    }
-    return a.Status
+var (
+    ErrAdvertDoesNotExist = errors.New("Advert does not exist")
+)
+
+func NewAdvert() *Advert {
+    var model = new(Advert);
+    model.SetCreatedAt();
+    model.SetStatusInitial();
+    return model;
+}
+
+func (a *Advert) SetCreatedAt() {
+    a.Created = time.Now().Unix();
+}
+
+func (a *Advert) SetStatusInitial() {
+    a.Status = statusNew;
 }
 
 func (a *Advert) GetCreated() time.Time {
-    if (a.Created == 0) {
-        a.Created = time.Now().Unix()
-    }
     return time.Unix(a.Created, 0)
 }
 
@@ -39,21 +48,21 @@ func (a *Advert) ExistsInDbByHashId() (bool, error) {
     var row *sql.Row
     var stmt *sql.Stmt
     var test = new(Advert)
-    stmt, err := db.Storage.Prepare("SELECT id FROM adverts WHERE hash_id = ?")
+    stmt, err := db.Storage.Prepare("SELECT id FROM advert WHERE hash_id = ?")
     if err != nil {
         return false, err
     }
     defer stmt.Close()
-    row = db.Storage.GetRow(stmt, a.HashId)
+    row = stmt.QueryRow(a.HashId)
     row.Scan(&test.Id)
     return test.Id > 0, nil
 }
 
-func (a *Advert) Insert() (error) {
+func (a *Advert) Insert() error {
     var result sql.Result
     var id int64
-    result, err := db.Storage.Run("INSERT INTO adverts (locality, link, hash_id, price, name, status, created) VALUES( ?, ?, ?, ?, ?, ?, ? )",
-        a.Locality, a.Link, a.HashId, a.Price, a.Name, a.GetStatus(), a.GetCreated().Unix())
+    result, err := db.Storage.Run("INSERT INTO advert (locality, link, hash_id, price, name, status, created) VALUES( ?, ?, ?, ?, ?, ?, ? )",
+        a.Locality, a.Link, a.HashId, a.Price, a.Name, a.Status, a.GetCreated().Unix())
     if err != nil {
         return err
     }
@@ -67,9 +76,9 @@ func (a *Advert) Insert() (error) {
     return nil
 }
 
-func (a *Advert) Update() (error) {
-    _, err := db.Storage.Run("UPDATE adverts SET locality = ?, link = ?, hash_id = ?, price = ?, name = ?, status = ? WHERE id = ?",
-        a.Locality, a.Link, a.HashId, a.Price, a.Name, a.GetStatus(), a.GetCreated().Unix())
+func (a *Advert) Update() error {
+    _, err := db.Storage.Run("UPDATE advert SET locality = ?, link = ?, hash_id = ?, price = ?, name = ?, status = ? WHERE id = ?",
+        a.Locality, a.Link, a.HashId, a.Price, a.Name, a.Status, a.GetCreated().Unix())
     if err != nil {
         return err
     }
@@ -80,12 +89,12 @@ func (a *Advert) Update() (error) {
     return nil
 }
 
-func (a *Advert) Delete() (error) {
+func (a *Advert) Delete() error {
     err := a.Location.Delete()
     if err != nil {
         return err
     }
-    _, err = db.Storage.Run("DELETE FROM adverts WHERE id = ?", a.Id)
+    _, err = db.Storage.Run("DELETE FROM advert WHERE id = ?", a.Id)
     if err != nil {
         return err
     }
@@ -103,12 +112,12 @@ func (a *Advert) LoadByHashId() error {
 func (a *Advert) loadBy(field string, value interface{}) error {
     var row *sql.Row
     var stmt *sql.Stmt
-    stmt, err := db.Storage.Prepare("SELECT id, locality, link, hash_id, price, name, status, created FROM adverts WHERE " + field + " = ?")
+    stmt, err := db.Storage.Prepare("SELECT id, locality, link, hash_id, price, name, status, created FROM advert WHERE " + field + " = ?")
     if err != nil {
         return err
     }
     defer stmt.Close()
-    row = db.Storage.GetRow(stmt, value)
+    row = stmt.QueryRow(value)
     row.Scan(&a.Id, &a.Locality, &a.Link, &a.HashId, &a.Price, &a.Name, &a.Status, &a.Created);
     if (a.Id > 0) {
         var lModel = new(Location);
@@ -116,7 +125,7 @@ func (a *Advert) loadBy(field string, value interface{}) error {
         lModel.LoadByAdvertId()
         a.Location = lModel
     } else {
-        return errors.New("Advert does not exist")
+        return ErrAdvertDoesNotExist
     }
     return nil
 }

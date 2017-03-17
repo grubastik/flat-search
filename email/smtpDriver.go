@@ -1,9 +1,7 @@
 package email
 
 import (
-    "fmt"
     "net"
-    "net/mail"
 	"net/smtp"
     "crypto/tls"
     "strconv"
@@ -12,12 +10,7 @@ import (
 
 const configName = "email"
 
-type EmailDefinition struct {
-    from *mail.Address
-    to *mail.Address
-    subject string
-    body string
-    headers map[string]string
+type EmailConnection struct {
     connection *smtp.Client
     server string
     port int
@@ -26,66 +19,52 @@ type EmailDefinition struct {
     password string
 }
 
-func NewEmail(config *config.Config) (*EmailDefinition) {
-    var emailDefinition *EmailDefinition = new(EmailDefinition);
-    moduleConfig := config.GetEmail();
+var emailConf *config.Email
 
-    if len(moduleConfig.To) > 0 {
-        emailDefinition.to = &mail.Address{"", moduleConfig.To}
+var Conn *EmailConnection
+
+func NewEmailConnection(config *config.Config) *EmailConnection {
+    var ec *EmailConnection = new(EmailConnection);
+    emailConf = config.GetEmail();
+
+    if len(emailConf.Server) > 0 {
+        ec.server = emailConf.Server;
     }
-    if len(moduleConfig.From) > 0 {
-        emailDefinition.from = &mail.Address{"", moduleConfig.From}
+    if emailConf.TlsPort > 0 {
+        ec.port = emailConf.TlsPort;
     }
-    if len(moduleConfig.Server) > 0 {
-        emailDefinition.server = moduleConfig.Server;
+    if emailConf.Tls {
+        ec.tlsEnabled = emailConf.Tls;
     }
-    if moduleConfig.TlsPort > 0 {
-        emailDefinition.port = moduleConfig.TlsPort;
+    if len(emailConf.Username) > 0 {
+        ec.username = emailConf.Username;
     }
-    if moduleConfig.Tls {
-        emailDefinition.tlsEnabled = moduleConfig.Tls;
+    if len(emailConf.Password) > 0 {
+        ec.password = emailConf.Password;
     }
-    if len(moduleConfig.Username) > 0 {
-        emailDefinition.username = moduleConfig.Username;
-    }
-    if len(moduleConfig.Password) > 0 {
-        emailDefinition.password = moduleConfig.Password;
-    }
-    return emailDefinition;
+    return ec;
 }
 
-func (ed *EmailDefinition) getMessage() (string) {
-    message := ""
-    for k,v := range ed.headers {
-        message += fmt.Sprintf("%s: %s\r\n", k, v)
-    }
-    message += fmt.Sprintf("%s: %s\r\n", "From", ed.from.String())
-    message += fmt.Sprintf("%s: %s\r\n", "To", ed.to.String())
-    message += fmt.Sprintf("%s: %s\r\n", "Subject", ed.subject)
-    message += "\r\n" + ed.body
-    return message
-}
-
-func (ed *EmailDefinition) Send() (error) {
+func (ec *EmailConnection) Send(ed *EmailDefinition) error {
     // Setup message
     message := ed.getMessage();
 
-    ed.makeSmtpClient()
-    defer ed.connection.Quit()
-    ed.authenticate()
+    ec.makeSmtpClient()
+    defer ec.connection.Quit()
+    ec.authenticate()
 
     // To && From
-    err := ed.connection.Mail(ed.from.Address);
+    err := ec.connection.Mail(ed.from.Address);
     if err != nil {
         return err
     }
-    err = ed.connection.Rcpt(ed.to.Address);
+    err = ec.connection.Rcpt(ed.to.Address);
     if err != nil {
         return err
     }
 
     // Data
-    w, err := ed.connection.Data()
+    w, err := ec.connection.Data()
     if err != nil {
         return err
     }
@@ -102,13 +81,13 @@ func (ed *EmailDefinition) Send() (error) {
     return nil
 }
 
-func (ed *EmailDefinition) authenticate() (error) {
-    host, err := GetHost(ed.server + ":" + strconv.Itoa(ed.port))
+func (ec *EmailConnection) authenticate() error {
+    host, err := GetHost(ec.server + ":" + strconv.Itoa(ec.port))
     if err != nil {
         return err
     }
-    auth := smtp.PlainAuth("", ed.username, ed.password, host)
-    err = ed.connection.Auth(auth);
+    auth := smtp.PlainAuth("", ec.username, ec.password, host)
+    err = ec.connection.Auth(auth);
     if err != nil {
         return err
     }
@@ -120,8 +99,8 @@ func GetHost(servername string) (string, error) {
     return host, err
 }
 
-func (ed *EmailDefinition) makeSmtpClient() (error) {
-    host, err := GetHost(ed.server + ":" + strconv.Itoa(ed.port))
+func (ec *EmailConnection) makeSmtpClient() error {
+    host, err := GetHost(ec.server + ":" + strconv.Itoa(ec.port))
     if err != nil {
         return err
     }
@@ -134,7 +113,7 @@ func (ed *EmailDefinition) makeSmtpClient() (error) {
     // Here is the key, you need to call tls.Dial instead of smtp.Dial
     // for smtp servers running on 465 that require an ssl connection
     // from the very beginning (no starttls)
-    conn, err := tls.Dial("tcp", ed.server + ":" + strconv.Itoa(ed.port), tlsconfig)
+    conn, err := tls.Dial("tcp", ec.server + ":" + strconv.Itoa(ec.port), tlsconfig)
     if err != nil {
         return err
     }
@@ -144,6 +123,6 @@ func (ed *EmailDefinition) makeSmtpClient() (error) {
         return err
     }
     
-    ed.connection = c
+    ec.connection = c
     return nil
 }

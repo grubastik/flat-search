@@ -34,7 +34,7 @@ type UrlParams struct {
 
 var conf *config.Config
 
-func NewSreality(config *config.Config) (*UrlParams) {
+func NewSreality(config *config.Config) *UrlParams {
     conf = config
     var urlParameters *UrlParams = new(UrlParams);
     moduleConfig := config.GetSreality();
@@ -137,7 +137,7 @@ func getStringFromIntSlice(val *[]int) string {
     return request
 }
 
-func getStringFromRange(val *rangeDefinition) (string) {
+func getStringFromRange(val *rangeDefinition) string {
     return strconv.Itoa(val.min) + "|" + strconv.Itoa(val.max)
 }
 
@@ -161,7 +161,7 @@ func (up *UrlParams) MakeRequest() (*Body, error) {
     return adverts, nil;
 }
 
-func (up *UrlParams) ProcessAdverts() (error) {
+func (up *UrlParams) ProcessAdverts() error {
     adverts, err := up.MakeRequest()
     if err != nil {
         return err
@@ -179,9 +179,7 @@ func (up *UrlParams) ProcessAdverts() (error) {
                 return err
             }
             //sendemail
-            email := email.NewEmail(conf)
-            email.PrepareData(aModel)
-            err = email.Send()
+            err = email.Conn.Send(email.NewEmail(aModel))
             if err != nil {
                 return err
             }

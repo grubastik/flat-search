@@ -1,2 +1,2 @@
-DROP TABLE `adverts`;
-DROP TABLE `locations`;
+DROP TABLE `location`;
+DROP TABLE `advert`;
