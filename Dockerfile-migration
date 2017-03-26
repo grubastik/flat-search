@@ -1,0 +1,26 @@
+# Start from a Debian image with the latest version of Go installed
+# and a workspace (GOPATH) configured at /go.
+FROM golang
+
+ARG DB_HOST
+ARG DB_USER
+ARG DB_PASSWORD
+ARG DB_NAME
+
+# Copy the local package files to the container's workspace.
+ADD ./config.json .
+
+# Build command inside the container.
+# (You may fetch or manage dependencies here,
+# either manually or with a tool like "godep".)
+RUN cd src; git clone https://github.com/grubastik/flat-search
+
+# to be removed after merge to master
+RUN cd $GOPATH/src/flat-search; git pull origin initial_commit
+
+RUN cd $GOPATH/src/flat-search; make pre-install
+
+# Run command by default when the container starts.
+#ENTRYPOINT while true; do flat-search -config=$GOPATH/config.json; sleep 600; done
+ENTRYPOINT migrate -url mysql://$DB_USER:$DB_PASSWORD@tcp\($DB_HOST:3306\)/$DB_NAME -path $GOPATH/src/flat-search/migrations/ up
+

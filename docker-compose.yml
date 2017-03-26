@@ -1,0 +1,30 @@
+version: '2'
+
+services:
+    db:
+        image: mysql
+        volumes:
+            - $GOPATH/mysql/flat-search/mysql:/var/lib/mysql
+            - $GOPATH/mysql/flat-search/mysql_log:/var/log/mysql
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: test100500
+            MYSQL_DATABASE: flat-search
+            MYSQL_USER: flat-agent
+            MYSQL_PASSWORD: test-flat-agent
+
+    flat-search:
+        depends_on:
+            - db
+        image: flat-search:latest
+        build:
+            context: ./
+        restart: "no"
+        links:
+            - db:db1
+        environment:
+            DB_HOST: db1
+            DB_USER: flat-agent
+            DB_PASSWORD: test-flat-agent
+            DB_NAME: flat-search
+

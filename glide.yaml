@@ -1,0 +1,16 @@
+package: main
+import:
+- package: github.com/grubastik/flat-search
+  version: initial_commit
+  subpackages:
+  - config
+  - db
+  - error
+  - models
+  - sreality
+- package: github.com/go-sql-driver/mysql
+- package: golang.org/x/net
+- package: golang.org/x/text/encoding
+- package: golang.org/x/crypto/ssh/terminal
+- package: golang.org/x/tools/go/buildutil
+- package: golang.org/x/tools/go/loader
