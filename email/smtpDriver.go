@@ -30,19 +30,19 @@ func NewConnection(config *config.Config) *Connection {
 	Conn = new(Connection)
 	emailConf = config.GetEmail()
 
-	if len(emailConf.Server) > 0 {
+	if emailConf != nil && emailConf.Server != "" {
 		Conn.server = emailConf.Server
 	}
-	if emailConf.TLSPort > 0 {
+	if emailConf != nil && emailConf.TLSPort > 0 {
 		Conn.port = emailConf.TLSPort
 	}
-	if emailConf.TLS {
+	if emailConf != nil && emailConf.TLS {
 		Conn.tlsEnabled = emailConf.TLS
 	}
-	if len(emailConf.Username) > 0 {
+	if emailConf != nil && emailConf.Username != "" {
 		Conn.username = emailConf.Username
 	}
-	if len(emailConf.Password) > 0 {
+	if emailConf != nil && emailConf.Password != "" {
 		Conn.password = emailConf.Password
 	}
 	return Conn

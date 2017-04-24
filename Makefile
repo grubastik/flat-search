@@ -11,16 +11,17 @@ BINARY=flat-search
 VERSION=0.0.2
 BUILD_TIME=`date +%FT%T%z`
 
-.DEFAULT_GOAL: build
-
+VENDOR_DIR=$(shell ls -d vendor | tail -n 1)
 # check if vendor folder exists
-ifeq (exists, $(shell [ -d vendor ] ) && echo exists )
+ifneq (, $(VENDOR_DIR))
 #check by linter
-LINTER_ERRORS:=$(subst vendor,$(nl)vendor, $(shell find ./vendor/github.com/grubastik/flat-search/ -type d -exec golint {} \;))
-ifneq ("${LINTER_ERRORS}", " ")
+LINTER_ERRORS=$(subst vendor,$(nl)vendor,$(shell find ./vendor/github.com/grubastik/flat-search/ -type d,l -exec golint {} \;))
+ifneq ("${LINTER_ERRORS}", "")
 build: check
 endif
 endif
+
+.DEFAULT_GOAL := build
 
 pre-install:
 	curl https://glide.sh/get | sh

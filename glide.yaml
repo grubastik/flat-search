@@ -10,7 +10,15 @@ import:
   - sreality
 - package: github.com/go-sql-driver/mysql
 - package: golang.org/x/net
-- package: golang.org/x/text/encoding
-- package: golang.org/x/crypto/ssh/terminal
-- package: golang.org/x/tools/go/buildutil
-- package: golang.org/x/tools/go/loader
+- package: golang.org/x/text
+  subpackages:
+  - encoding
+- package: golang.org/x/crypto
+  subpackages:
+  - ssh/terminal
+- package: golang.org/x/tools
+  subpackages:
+  - go/buildutil
+  - go/loader
+- package: github.com/davecgh/go-spew
+  version: ^1.1.0

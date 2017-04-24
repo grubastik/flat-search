@@ -57,36 +57,35 @@ type rangeInt struct {
 }
 
 // MustNewConfig reads config and prepares config struct
-func MustNewConfig(path *string) *Config {
-	config := new(Config)
-	content, err := ioutil.ReadFile(*path)
+func MustNewConfig(path string) *Config {
+	c := new(Config)
+	content, err := ioutil.ReadFile(path)
 	if err != nil {
 		panic(fmt.Sprintf("%v", err))
 	}
 
-	err = json.Unmarshal(content, config)
+	err = json.Unmarshal(content, c)
 	if err != nil {
 		panic(fmt.Sprintf("%v", err))
 	}
 
     // override options from config file with env vars
-	if os.Getenv("DB_HOST") != "" {
-		config.Db.Host = os.Getenv("DB_HOST")
+	if h := os.Getenv("DB_HOST"); h != "" {
+		c.Db.Host = h
 	}
 
-	if os.Getenv("DB_USER") != "" {
-		config.Db.Username = os.Getenv("DB_USER")
+	if u := os.Getenv("DB_USER"); u != "" {
+		c.Db.Username = u
 	}
 
-	if os.Getenv("DB_PASSWORD") != "" {
-		config.Db.Password = os.Getenv("DB_PASSWORD")
+	if p := os.Getenv("DB_PASSWORD"); p != "" {
+		c.Db.Password = p
 	}
 
-	if os.Getenv("DB_NAME") != "" {
-		config.Db.Database = os.Getenv("DB_NAME")
+	if dn := os.Getenv("DB_NAME"); dn != "" {
+		c.Db.Database = dn
 	}
-
-	return config
+	return c
 }
 
 // GetDb returns config for DB

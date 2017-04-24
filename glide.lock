@@ -1,0 +1,32 @@
+hash: c06edd2e4b286d796e9ba67dce17e4d336d11a5a778aa7074571b23560a42619
+updated: 2017-03-29T09:06:01.649160185+02:00
+imports:
+- name: github.com/davecgh/go-spew
+  version: 346938d642f2ec3594ed81d874461961cd0faa76
+- name: github.com/go-sql-driver/mysql
+  version: 9dee4ca50b83acdf57a35fb9e6fb4be640afa2f3
+- name: github.com/grubastik/flat-search
+  version: 63878a5d9984ad79aca1d2b55a652ddafb0b8f9f
+  subpackages:
+  - config
+  - db
+  - email
+  - error
+  - models
+  - sreality
+- name: golang.org/x/crypto
+  version: 459e26527287adbc2adcc5d0d49abff9a5f315a7
+  subpackages:
+  - ssh/terminal
+- name: golang.org/x/net
+  version: 05d3205156cb1bdc096578d6457fa161cd950aa2
+- name: golang.org/x/text
+  version: fc7fa097411d30e6708badff276c4c164425590c
+  subpackages:
+  - encoding
+- name: golang.org/x/tools
+  version: d63e2b22b05a9682de336cd4802bba367ed429e7
+  subpackages:
+  - go/buildutil
+  - go/loader
+testImports: []
