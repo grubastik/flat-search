@@ -2,10 +2,11 @@ package email
 
 import (
 	"crypto/tls"
-	"github.com/grubastik/flat-search/config"
 	"net"
 	"net/smtp"
 	"strconv"
+
+	"github.com/grubastik/flat-search/config"
 )
 
 const configName = "email"
@@ -22,30 +23,30 @@ type Connection struct {
 
 var emailConf *config.Email
 
-// Conn contains information about connection opened to smtp server
-var Conn *Connection
+// C contains information about connection opened to smtp server
+var C *Connection
 
 // NewConnection populates struct Connection and opens connection to the smtp server
 func NewConnection(config *config.Config) *Connection {
-	Conn = new(Connection)
+	C = new(Connection)
 	emailConf = config.GetEmail()
 
 	if emailConf != nil && emailConf.Server != "" {
-		Conn.server = emailConf.Server
+		C.server = emailConf.Server
 	}
 	if emailConf != nil && emailConf.TLSPort > 0 {
-		Conn.port = emailConf.TLSPort
+		C.port = emailConf.TLSPort
 	}
 	if emailConf != nil && emailConf.TLS {
-		Conn.tlsEnabled = emailConf.TLS
+		C.tlsEnabled = emailConf.TLS
 	}
 	if emailConf != nil && emailConf.Username != "" {
-		Conn.username = emailConf.Username
+		C.username = emailConf.Username
 	}
 	if emailConf != nil && emailConf.Password != "" {
-		Conn.password = emailConf.Password
+		C.password = emailConf.Password
 	}
-	return Conn
+	return C
 }
 
 // GetHost accepts string with service address and get host name from it
@@ -118,12 +119,12 @@ func (ec *Connection) makeSMTPClient() error {
 	// Here is the key, you need to call tls.Dial instead of smtp.Dial
 	// for smtp servers running on 465 that require an ssl connection
 	// from the very beginning (no starttls)
-	conn, err := tls.Dial("tcp", ec.server+":"+strconv.Itoa(ec.port), tlsconfig)
+	tc, err := tls.Dial("tcp", ec.server+":"+strconv.Itoa(ec.port), tlsconfig)
 	if err != nil {
 		return err
 	}
 
-	c, err := smtp.NewClient(conn, host)
+	c, err := smtp.NewClient(tc, host)
 	if err != nil {
 		return err
 	}

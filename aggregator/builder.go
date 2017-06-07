@@ -95,7 +95,10 @@ func ConvertSrealityToModel(a sreality.Advert, d sreality.Detail) *models.Advert
     am.Price = a.Price
     am.Name = a.Name
     am.Link = sreality.GetDetailLink(a)
-    am.Description = d.Text.Value.(string)
+    am.Description = ""
+    if (d.Text.Value != nil) {
+        am.Description = d.Text.Value.(string)
+    }
     lm.Lat = a.Gps.Lat
     lm.Lon = a.Gps.Lon
     am.Location = lm
@@ -148,12 +151,9 @@ func ConvertSrealityToModel(a sreality.Advert, d sreality.Detail) *models.Advert
                     pm.Value = p.Value.(string)
                 }
                 case "boolean":
-                if p.Value == nil {
-                    pm.Value = "Ne"
-                } else {
-                    if p.Value.(bool) {
-                        pm.Value = "Ano"
-                    }
+                pm.Value = "Ne"
+                if p.Value != nil && p.Value.(bool) {
+                    pm.Value = "Ano"
                 }
                 case "set":
                 if p.Value == nil {

@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 )
@@ -61,15 +60,15 @@ func MustNewConfig(path string) *Config {
 	c := new(Config)
 	content, err := ioutil.ReadFile(path)
 	if err != nil {
-		panic(fmt.Sprintf("%v", err))
+		panic(err)
 	}
 
 	err = json.Unmarshal(content, c)
 	if err != nil {
-		panic(fmt.Sprintf("%v", err))
+		panic(err)
 	}
 
-    // override options from config file with env vars
+	// override options from config file with env vars
 	if h := os.Getenv("DB_HOST"); h != "" {
 		c.Db.Host = h
 	}

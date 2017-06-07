@@ -27,7 +27,7 @@ CREATE TABLE `location` (
 CREATE TABLE `property` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `advert_id` int(10) unsigned DEFAULT NULL,
-  `name` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `value` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `advert_id` (`advert_id`),
@@ -46,10 +46,10 @@ CREATE TABLE `image` (
 CREATE TABLE `realtor` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `advert_id` int(10) unsigned DEFAULT NULL,
-  `name` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `phone` varchar(15) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `email` varchar(30) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `company` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `email` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `company` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `company_phone` varchar(15) COLLATE utf8_unicode_ci DEFAULT NULL,
   `company_ico` varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
