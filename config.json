@@ -1,0 +1,34 @@
+{
+    "db": {
+        "engine": "mysql",
+        "host": "localhost",
+        "port": 3306,
+        "username": "",
+        "password": "",
+        "database": ""
+    },
+    "email": {
+        "to": "",
+        "from": "",
+        "server": "smtp.gmail.com",
+        "tls": true,
+        "tls_port": 465,
+        "username": "",
+        "password": ""
+    },
+    "sreality": {
+        "url": "https://www.sreality.cz/api/cs/v2/estates",
+        "url_detail": "https://www.sreality.cz/detail/",
+        "reality_type": 1,
+        "operation_type": 2,
+        "reality_options": [2,3,4],
+        "country": 112,
+        "region": [10],
+        "district": [5001,5002,5003,5004,5005,5007,5006,5008],
+        "page_results": 100,
+        "estate_age": 2,
+        "square": {"min": 32, "max": 45},
+        "price": {"min": 0, "max": 10000}
+    }
+}
+
