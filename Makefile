@@ -24,7 +24,7 @@ endif
 .DEFAULT_GOAL := build
 
 pre-install:
-	curl https://glide.sh/get | sh
+	go get -u github.com/golang/dep/cmd/dep
 	go get -u github.com/mattes/migrate
 
 build:
@@ -33,7 +33,7 @@ build:
 
 .PHONY: install
 install:
-	${GOPATH}/bin/glide install
+	dep install
 	go install ./...
 
 .PHONY: clean
