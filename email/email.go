@@ -5,28 +5,33 @@ import (
 	"github.com/grubastik/flat-search/models"
 	"net/mail"
 	"strconv"
+	"errors"
 )
 
 // Definition stores email info
 type Definition struct {
 	from    *mail.Address
-	to      *mail.Address
+	to      []*mail.Address
 	subject string
 	body    string
 	headers map[string]string
 }
 
 // NewEmail creates new email struct and populate it with values stored in config
-func NewEmail(model *models.Advert) *Definition {
+func NewEmail(model *models.Advert) (*Definition, error) {
 	ed := new(Definition)
 	if emailConf != nil && emailConf.To != "" {
-		ed.to = &mail.Address{"", emailConf.To}
+		to, err := mail.ParseAddressList(emailConf.To)
+		if err != nil {
+			return nil, errors.New(fmt.Sprintf("Unable to parse email list: %s", err.Error()))
+		}
+		ed.to = to
 	}
 	if emailConf != nil && emailConf.From != "" {
 		ed.from = &mail.Address{"", emailConf.From}
 	}
 	ed.PrepareData(model)
-	return ed
+	return ed, nil
 }
 
 // PrepareData populates struct with imail info based on the model data
@@ -37,11 +42,16 @@ func (ed *Definition) PrepareData(model *models.Advert) {
 
 func (ed *Definition) getMessage() string {
 	message := ""
+	to := ""
 	for k, v := range ed.headers {
 		message += fmt.Sprintf("%s: %s\r\n", k, v)
 	}
+	for _, t := range ed.to {
+		to += fmt.Sprintf("%s", t.String())
+		to += ";"
+	}
 	message += fmt.Sprintf("%s: %s\r\n", "From", ed.from.String())
-	message += fmt.Sprintf("%s: %s\r\n", "To", ed.to.String())
+	message += fmt.Sprintf("%s: %s\r\n", "To", to[:len(to) - 1])
 	message += fmt.Sprintf("%s: %s\r\n", "Subject", ed.subject)
 	message += "\r\n" + ed.body
 	return message
