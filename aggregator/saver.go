@@ -58,12 +58,17 @@ func saveToDb(l []*models.Advert) error {
 	return nil
 }
 
-func snedEmails(l []*models.Advert) error {
+func sendEmails(l []*models.Advert) error {
 	var err error
+	var def *email.Definition
 	for _, a := range l {
 		if a.IsNew {
 			//sendemail
-			err = email.C.Send(email.NewEmail(a))
+			def, err = email.NewEmail(a)
+			if err != nil {
+				return err
+			}
+			err = email.C.Send(def)
 			if err != nil {
 				return err
 			}
