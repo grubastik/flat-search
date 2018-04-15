@@ -44,7 +44,7 @@ func ProcessAdverts(c *config.Sreality) error {
     if (err != nil) {
         return err
     }
-    return snedEmails(l)
+    return sendEmails(l)
 }
 
 // PopulateSrealityParams populates info from config to sreality structure

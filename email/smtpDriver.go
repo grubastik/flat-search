@@ -69,9 +69,11 @@ func (ec *Connection) Send(ed *Definition) error {
 	if err != nil {
 		return err
 	}
-	err = ec.connection.Rcpt(ed.to.Address)
-	if err != nil {
-		return err
+	for _, rcpt := range ed.to {
+		err = ec.connection.Rcpt(rcpt.Address)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Data
