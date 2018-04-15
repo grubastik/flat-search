@@ -1,11 +1,11 @@
 package email
 
 import (
+	"errors"
 	"fmt"
 	"github.com/grubastik/flat-search/models"
 	"net/mail"
 	"strconv"
-	"errors"
 )
 
 // Definition stores email info
@@ -51,7 +51,7 @@ func (ed *Definition) getMessage() string {
 		to += ";"
 	}
 	message += fmt.Sprintf("%s: %s\r\n", "From", ed.from.String())
-	message += fmt.Sprintf("%s: %s\r\n", "To", to[:len(to) - 1])
+	message += fmt.Sprintf("%s: %s\r\n", "To", to[:len(to)-1])
 	message += fmt.Sprintf("%s: %s\r\n", "Subject", ed.subject)
 	message += "\r\n" + ed.body
 	return message
@@ -78,20 +78,20 @@ func getBody(model *models.Advert) string {
 		"\n\n " + model.Description +
 		"\n\nRealtor: " + model.Realtor.Name + "(phone: " + model.Realtor.Phone + "; email: " + model.Realtor.Email + ")"
 
-	if (model.Properties != nil) {
-	    body+= "\n\n Properties:"
-	    for _,p := range model.Properties {
-	        body+= "\n" + p.Name + ": " + p.Value
-	    }
-    }
-    
-	if (model.Images != nil) {
-        body+= "\n\n Images:"
-	    for k,i := range model.Images {
-	        body+= "\n\n - " + strconv.FormatInt(int64(k + 1), 10) + " - " + i.URL
-	    }
-    }
-    
-    body+= "\n"
-    return body
+	if model.Properties != nil {
+		body += "\n\n Properties:"
+		for _, p := range model.Properties {
+			body += "\n" + p.Name + ": " + p.Value
+		}
+	}
+
+	if model.Images != nil {
+		body += "\n\n Images:"
+		for k, i := range model.Images {
+			body += "\n\n - " + strconv.FormatInt(int64(k+1), 10) + " - " + i.URL
+		}
+	}
+
+	body += "\n"
+	return body
 }

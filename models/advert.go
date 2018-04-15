@@ -81,4 +81,3 @@ func (a *Advert) SetStatusInitial() {
 func (a *Advert) GetCreated() time.Time {
 	return time.Unix(a.Created, 0)
 }
-

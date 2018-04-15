@@ -3,7 +3,7 @@ package error
 import (
 	"os"
 
-    "github.com/davecgh/go-spew/spew"
+	"github.com/davecgh/go-spew/spew"
 )
 
 // DebugError performs reporting about error

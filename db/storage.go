@@ -1,8 +1,8 @@
 package db
 
 import (
-	"errors"
 	"database/sql"
+	"errors"
 	"strconv"
 
 	_ "github.com/go-sql-driver/mysql" //this package responsible for the sql queries - so we import it here
@@ -12,29 +12,29 @@ import (
 
 // Updateable interface defines update method.
 type Updateable interface {
-    Update(e interface{}) error
+	Update(e interface{}) error
 }
 
 // Insertable interface defines insert method.
 type Insertable interface {
-    Insert(e interface{}) error
+	Insert(e interface{}) error
 }
 
 // Deleteable interface defines delete method.
 type Deleteable interface {
-    Delete(id int64) error
+	Delete(id int64) error
 }
 
 // Loadable interface defines load method.
 type Loadable interface {
-    Load(f string, v interface{}, e interface{}) (interface{}, error)
+	Load(f string, v interface{}, e interface{}) (interface{}, error)
 }
 
 const configName = "db"
 
 var (
-    // ErrConfig defines error in case module configuration missed in config.
-    ErrConfig = errors.New("Config for db module is missing")
+	// ErrConfig defines error in case module configuration missed in config.
+	ErrConfig = errors.New("Config for db module is missing")
 )
 
 // StorageEntity contains connection dto DB
@@ -58,11 +58,11 @@ func NewDb(config *config.Config) (*StorageEntity, error) {
 // Connect performs connection to the DB and store it locally
 func (st *StorageEntity) Connect(config *config.Db) error {
 	var err error
-	if (config != nil) {
-	    st.Db, err = sql.Open(config.Engine, config.Username+":"+config.Password+"@tcp("+config.Host+":"+strconv.Itoa(int(config.Port))+")/"+config.Database+"?charset=utf8")
-	    return err
-    }
-    return ErrConfig;
+	if config != nil {
+		st.Db, err = sql.Open(config.Engine, config.Username+":"+config.Password+"@tcp("+config.Host+":"+strconv.Itoa(int(config.Port))+")/"+config.Database+"?charset=utf8")
+		return err
+	}
+	return ErrConfig
 }
 
 // Close closes connection to the DB
