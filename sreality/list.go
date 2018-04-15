@@ -36,6 +36,7 @@ type URLParamsList struct {
     PerPage               int
     usableArea            *rangeDefinition
     czkPriceSummaryOrder2 *rangeDefinition
+    Furnished             []int
 }
 
 //Location stores geographical coordinates
@@ -127,6 +128,9 @@ func (up *URLParamsList) GetRequest() (request string) {
     }
     if up.czkPriceSummaryOrder2 != nil {
         requestParts = append(requestParts, "czk_price_summary_order2="+getStringFromRange(up.czkPriceSummaryOrder2))
+    }
+    if up.Furnished != nil && len(up.Furnished) > 0 {
+    	requestParts = append(requestParts, "furnished="+getStringFromIntSlice(up.Furnished))
     }
     request = ""
     if len(requestParts) > 0 {

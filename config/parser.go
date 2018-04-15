@@ -48,6 +48,7 @@ type Sreality struct {
 	EstateAge      int       `json:"estate_age"`
 	Square         *rangeInt `json:"square"`
 	Price          *rangeInt `json:"price"`
+	Furnished      []int     `json:"furnished"`
 }
 
 type rangeInt struct {

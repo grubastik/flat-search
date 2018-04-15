@@ -79,6 +79,9 @@ func PopulateSrealityParams(c *config.Sreality, up *sreality.URLParamsList) {
     if c.Price != nil {
         up.SetPriceRange(c.Price.Min, c.Price.Max)
     }
+    if c.Furnished != nil {
+        up.Furnished = c.Furnished
+    }
 }
 
 // ConvertSrealityToModel builds model based on the data from response
