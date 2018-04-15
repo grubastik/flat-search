@@ -15,7 +15,7 @@ VENDOR_DIR=$(shell ls -d vendor | tail -n 1)
 # check if vendor folder exists
 ifneq (, $(VENDOR_DIR))
 #check by linter
-LINTER_ERRORS=$(subst vendor,$(nl)vendor,$(shell find ./vendor/github.com/grubastik/flat-search/ -type d,l -exec golint {} \;))
+LINTER_ERRORS=$(subst vendor,$(nl)vendor,$(shell find ./ -path ./vendor -prune -o -type d,l -exec golint {} \;))
 ifneq ("${LINTER_ERRORS}", "")
 build: check
 endif
@@ -25,15 +25,17 @@ endif
 
 pre-install:
 	go get -u github.com/golang/dep/cmd/dep
-	go get -u github.com/mattes/migrate
+	go get -u -d github.com/golang-migrate/migrate/cli github.com/go-sql-driver/mysql
+	go build -tags 'mysql' -o ${GOPATH}/bin/migrate github.com/golang-migrate/migrate/cli
+	${GOPATH}/bin/dep ensure
 
 build:
-	gofmt -w ./vendor/github.com/grubastik/flat-search/
+	gofmt -w ./
 	go build -o ${BINARY} main.go
 
 .PHONY: install
 install:
-	dep install
+	${GOPATH}/bin/dep ensure
 	go install ./...
 
 .PHONY: clean
@@ -41,7 +43,12 @@ clean:
 	if [ -f ${BINARY} ] ; then rm ${BINARY} ; fi
 
 migrate:
-	${GOPATH}/bin/migrate
+	read -p "Enter Database user: " USER; \
+	read -p "Enter Database password: " PASSWORD; \
+	read -p "Enter Database host: " HOST; \
+	read -p "Enter Database port: " PORT; \
+	read -p "Enter Database name: " NAME; \
+	${GOPATH}/bin/migrate -database mysql://$$USER:$$PASSWORD@tcp\($$HOST:$$PORT\)/$$NAME -path ./migrations/ up
 
 check:
 	$(error "fix linter errors first:${LINTER_ERRORS}")

@@ -13,14 +13,12 @@ ADD ./config.json .
 # Build command inside the container.
 # (You may fetch or manage dependencies here,
 # either manually or with a tool like "godep".)
-RUN cd src; git clone https://github.com/grubastik/flat-search
+RUN mkdir -p src/github.com/grubastik
+RUN cd src/github.com/grubastik; git clone https://github.com/grubastik/flat-search
 
-# to be removed after merge to master
-RUN cd $GOPATH/src/flat-search; git pull origin initial_commit
-
-RUN cd $GOPATH/src/flat-search; make pre-install
+RUN cd $GOPATH/src/github.com/grubastik/flat-search; make pre-install
 
 # Run command by default when the container starts.
 #ENTRYPOINT while true; do flat-search -config=$GOPATH/config.json; sleep 600; done
-ENTRYPOINT migrate -url mysql://$DB_USER:$DB_PASSWORD@tcp\($DB_HOST:3306\)/$DB_NAME -path $GOPATH/src/flat-search/migrations/ up
+ENTRYPOINT migrate -database mysql://$DB_USER:$DB_PASSWORD@tcp\($DB_HOST:3306\)/$DB_NAME -path $GOPATH/src/flat-search/migrations/ up
 
