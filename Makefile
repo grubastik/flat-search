@@ -28,7 +28,7 @@ pre-install:
 	go get -u github.com/mattes/migrate
 
 build:
-	gofmt -w ./vendor/github.com/grubastik/flat-search/
+	# gofmt -w ./vendor/github.com/grubastik/flat-search/
 	go build -o ${BINARY} main.go
 
 .PHONY: install
