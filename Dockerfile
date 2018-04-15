@@ -10,7 +10,7 @@ ADD ./config.json .
 # either manually or with a tool like "godep".)
 
 # to be removed after merge to master
-RUN cd $GOPATH/src/flat-search; make pre-install; make install
+RUN cd $GOPATH/src/flat-search; make make install
 
 # Run command by default when the container starts.
 ENTRYPOINT while true; do flat-search -config=$GOPATH/config.json; sleep 600; done

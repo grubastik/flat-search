@@ -16,7 +16,7 @@ ADD ./config.json .
 RUN cd src; git clone https://github.com/grubastik/flat-search
 
 # to be removed after merge to master
-# RUN cd $GOPATH/src/flat-search; git pull origin initial_commit
+RUN cd $GOPATH/src/flat-search; git pull origin initial_commit
 
 RUN cd $GOPATH/src/flat-search; make pre-install
 
