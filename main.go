@@ -2,11 +2,11 @@ package main
 
 import (
 	"flag"
+	"github.com/grubastik/flat-search/aggregator"
 	"github.com/grubastik/flat-search/config"
 	"github.com/grubastik/flat-search/db"
 	"github.com/grubastik/flat-search/email"
 	"github.com/grubastik/flat-search/error"
-	"github.com/grubastik/flat-search/aggregator"
 )
 
 func main() {
