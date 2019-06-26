@@ -11,31 +11,24 @@ BINARY=flat-search
 VERSION=0.0.2
 BUILD_TIME=`date +%FT%T%z`
 
-VENDOR_DIR=$(shell ls -d vendor | tail -n 1)
-# check if vendor folder exists
-ifneq (, $(VENDOR_DIR))
-#check by linter
-LINTER_ERRORS=$(subst vendor,$(nl)vendor,$(shell find ./ -path ./vendor -prune -o -type d,l -exec golint {} \;))
-ifneq ("${LINTER_ERRORS}", "")
-build: check
-endif
-endif
-
 .DEFAULT_GOAL := build
 
+pre-install: export GO111MODULE=on
 pre-install:
-	go get -u github.com/golang/dep/cmd/dep
+	go mod download
 	go get -u -d github.com/golang-migrate/migrate/cli github.com/go-sql-driver/mysql
 	go build -tags 'mysql' -o ${GOPATH}/bin/migrate github.com/golang-migrate/migrate/cli
-	${GOPATH}/bin/dep ensure
 
+build: export GO111MODULE=on
 build:
+	go mod verify
 	gofmt -w ./
 	go build -o ${BINARY} main.go
 
 .PHONY: install
+install: export GO111MODULE=on
 install:
-	${GOPATH}/bin/dep ensure
+	go mod download
 	go install ./...
 
 .PHONY: clean
@@ -53,7 +46,7 @@ migrate:
 check:
 	$(error "fix linter errors first:${LINTER_ERRORS}")
 
-run.docker:
+docker-compose:
 	docker-compose down
 	docker-compose -f docker-compose-migration.yml down
 	docker-compose rm
@@ -64,9 +57,9 @@ run.docker:
 	docker-compose create flat-search
 	docker-compose stop
 
-docker.start:
+docker-start:
 	docker-compose start
 
-docker.stop:
+docker-stop:
 	docker-compose stop
 

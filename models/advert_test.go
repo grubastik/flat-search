@@ -18,7 +18,7 @@ func TestGetAstronauts(t *testing.T) {
 	}
 
 	if a.Status != statusNew {
-		t.Error("Status is wrong, got: %s, want: %s", a.Status, statusNew)
+		t.Errorf("Status is wrong, got: %s, want: %s", a.Status, statusNew)
 	}
 }
 
@@ -34,7 +34,7 @@ func TestSetStatusInitial(t *testing.T) {
 	a := new(Advert)
 	a.SetStatusInitial()
 	if a.Status != statusNew {
-		t.Error("Status is wrong, got: %s, want: %s", a.Status, statusNew)
+		t.Errorf("Status is wrong, got: %s, want: %s", a.Status, statusNew)
 	}
 }
 
@@ -47,6 +47,6 @@ func TestGetCreated(t *testing.T) {
 	}
 
 	if time.Now().Unix()-ti.Unix() > 1 {
-		t.Error("Time stored in created field is wrong, got: %s, want: %s", ti.Unix(), time.Now().Unix())
+		t.Errorf("Time stored in created field is wrong, got: %d, want: %d", ti.Unix(), time.Now().Unix())
 	}
 }
