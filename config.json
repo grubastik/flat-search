@@ -3,13 +3,13 @@
         "engine": "mysql",
         "host": "localhost",
         "port": 3306,
-        "username": "",
-        "password": "",
-        "database": ""
+        "username": "root",
+        "password": "test100500",
+        "database": "flat-search"
     },
     "email": {
-        "to": "comma separated list",
-        "from": "",
+        "to": "admin@localhost",
+        "from": "admin@localhost",
         "server": "smtp.gmail.com",
         "tls": true,
         "tls_port": 465,
@@ -29,7 +29,7 @@
         "estate_age": 2,
 	"furnished": [2,3],
         "square": {"min": 32, "max": 45},
-        "price": {"min": 0, "max": 10000}
+        "price": {"min": 0, "max": 50000}
     }
 }
 

@@ -1,30 +1,34 @@
-version: '2'
-
+version: '3.7'
 services:
-    db:
-        image: mysql
+    flat-search:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: flatsearch
+        depends_on:
+            - storage
+        links:
+            - storage:storage
+        environment:
+            DB_HOST: storage
+            DB_NAME: flat-search
+            DB_USER: flat-agent
+            DB_PASSWORD: test-flat-agent
         volumes:
-            - $GOPATH/mysql/flat-search/mysql:/var/lib/mysql
-            - $GOPATH/mysql/flat-search/mysql_log:/var/log/mysql
-        restart: always
+            - go-pkg:/go/pkg
+            - go-cache:/.cache
+
+    storage:
+        container_name: flatsearch-storage
+        image: mysql:8.0.19
         environment:
             MYSQL_ROOT_PASSWORD: test100500
             MYSQL_DATABASE: flat-search
             MYSQL_USER: flat-agent
             MYSQL_PASSWORD: test-flat-agent
+        ports:
+           - 3306:3306
 
-    flat-search:
-        depends_on:
-            - db
-        image: flat-search:latest
-        build:
-            context: ./
-        restart: "no"
-        links:
-            - db:db1
-        environment:
-            DB_HOST: db1
-            DB_USER: flat-agent
-            DB_PASSWORD: test-flat-agent
-            DB_NAME: flat-search
-
+volumes:
+    go-cache:
+    go-pkg:
