@@ -1,0 +1,5 @@
+FROM golang:1.13
+WORKDIR /opt/app
+RUN go get github.com/cespare/reflex \
+  && curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin
+ENTRYPOINT ["reflex", "--decoration=none", "--regex=\\.go$", "-s", "--", "go", "run", "/opt/app/main.go"]

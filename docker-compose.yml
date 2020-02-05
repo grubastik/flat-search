@@ -3,7 +3,7 @@ services:
     flat-search:
         build:
             context: .
-            dockerfile: Dockerfile
+            dockerfile: Dockerfile.dev
         container_name: flatsearch
         depends_on:
             - storage
@@ -15,6 +15,7 @@ services:
             DB_USER: flat-agent
             DB_PASSWORD: test-flat-agent
         volumes:
+            - .:/opt/app
             - go-pkg:/go/pkg
             - go-cache:/.cache
 
