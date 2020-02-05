@@ -1,7 +1,8 @@
 module github.com/grubastik/flat-search
 
+go 1.13
+
 require (
-	github.com/davecgh/go-spew v1.1.0
 	github.com/go-sql-driver/mysql v1.4.1
-	github.com/golang-migrate/migrate v3.5.4+incompatible // indirect
+	google.golang.org/appengine v1.5.0 // indirect
 )

@@ -2,6 +2,7 @@ package aggregator
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"strconv"
 	"time"
@@ -40,6 +41,9 @@ func ProcessAdverts(c *config.Sreality) error {
 		}
 		l = append(l, ConvertSrealityToModel(a, *d))
 	}
+
+	fmt.Println("processed adverts:", len(l))
+
 	err = saveToDb(l)
 	if err != nil {
 		return err
