@@ -20,7 +20,7 @@ services:
 
     storage:
         container_name: flatsearch-storage
-        image: mysql:8.0.19
+        image: mysql:8.0.26
         environment:
             MYSQL_ROOT_PASSWORD: test100500
             MYSQL_DATABASE: flat-search
